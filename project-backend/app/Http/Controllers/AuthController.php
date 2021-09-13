@@ -8,6 +8,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -56,20 +57,22 @@ class AuthController extends Controller
      * @param Login $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login(Login $request)
+    public function login(Request $request)
     {
-
-        $data = [
-            'email' => $request->email,
-            'password' => $request->password
-        ];
-
-        if (auth()->attempt($data)) {
-            $token = auth()->user()->createToken(Str::random(10))->accessToken;
-            return response()->json(['token' => $token], 200);
+        $user = User::where('email', $request->email)->first();
+        if ($user) {
+            if (Hash::check($request->password, $user->password)) {
+                $token = $user->createToken('Laravel Password Grant Client')->accessToken;
+                auth()->guard('api')->user();
+                return response()->json(['success' => 'Logged In'], 200);
+            } else {
+                $response = ["message" => "Password mismatch"];
+                return response()->json(['error' => 'Wrong Credentials'], 401);
+            }
         } else {
             return response()->json(['error' => 'Wrong Credentials'], 401);
         }
+
     }
 
     public function verify(Request $request){

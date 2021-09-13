@@ -22,8 +22,8 @@ Route::post('verification', [AuthController::class, 'verify'])->name('verify.api
 
 Route::get('/products', [ProductController::class, 'index'])->name("countries.index");
 
-Route::get('/products/create', [ProductController::class, 'create']);
-Route::post('/products/create', [ProductController::class, 'store']);
+Route::get('/products/create', [ProductController::class, 'create'])->middleware('auth:api');
+Route::post('/products/create', [ProductController::class, 'store'])->middleware('auth:api');
 
 Route::get('/products/edit/{id}', [ProductController::class, 'edit']);
 Route::post('/products/edit/{id}', [ProductController::class, 'update']);
